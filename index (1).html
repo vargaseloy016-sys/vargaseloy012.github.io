@@ -1,0 +1,2819 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPIS UNAJMA - Sistema de Gestión Académica</title>
+    <link rel="icon" type="image/png" href="logo_epis.jpg">
+    <style>
+        :root {
+            --primary: #0066cc;
+            --primary-dark: #004d99;
+            --primary-light: #3385d6;
+            --secondary: #0a1929;
+            --accent: #1e3a5f;
+            --accent-dark: #0d2844;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --info: #17a2b8;
+            
+            --bg-primary: #f4f6f9;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #e8ecf1;
+            --text-primary: #1a1a2e;
+            --text-secondary: #5a6c7d;
+            --border: #d1dce5;
+            --sidebar-bg: #0a1929;
+            --sidebar-text: #ffffff;
+            --shadow: rgba(10, 25, 41, 0.08);
+            --shadow-hover: rgba(10, 25, 41, 0.15);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #151922;
+            --bg-tertiary: #1f2937;
+            --text-primary: #e8ecf1;
+            --text-secondary: #9ca3af;
+            --border: #2d3748;
+            --sidebar-bg: #000000;
+            --sidebar-text: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.4);
+            --shadow-hover: rgba(0, 0, 0, 0.6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            display: flex;
+            transition: all 0.3s ease;
+            line-height: 1.6;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+            transition: all 0.3s;
+            z-index: 1000;
+            box-shadow: 2px 0 24px var(--shadow);
+            border-right: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .sidebar-header {
+            padding: 32px 20px;
+            background: linear-gradient(135deg, #0a1929 0%, #1e3a5f 100%);
+            color: white;
+            text-align: center;
+            border-bottom: 3px solid var(--primary);
+            position: relative;
+        }
+
+        .sidebar-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        }
+
+        .sidebar-logo {
+            max-width: 140px;
+            height: 140px;
+            display: block;
+            margin: 0 auto 18px;
+            padding: 0;
+            background: transparent;
+            border-radius: 50%;
+            box-shadow: 0 8px 32px rgba(0, 102, 204, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            object-fit: cover;
+        }
+
+        .sidebar-header h2 {
+            font-size: 22px;
+            margin-bottom: 6px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: white;
+        }
+
+        .sidebar-header p {
+            font-size: 12px;
+            opacity: 0.85;
+            font-weight: 500;
+            color: #3385d6;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 24px 16px;
+        }
+
+        .menu-item {
+            margin-bottom: 6px;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            padding: 14px 18px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            transition: all 0.2s;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            opacity: 0.85;
+            position: relative;
+        }
+
+        .menu-link::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 60%;
+            background: var(--primary);
+            transition: width 0.3s;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .menu-link:hover::before {
+            width: 4px;
+        }
+
+        .menu-link:hover {
+            background: rgba(0, 102, 204, 0.15);
+            opacity: 1;
+            transform: translateX(4px);
+        }
+
+        .menu-link.active {
+            background: linear-gradient(135deg, rgba(0, 102, 204, 0.25) 0%, rgba(0, 77, 153, 0.25) 100%);
+            opacity: 1;
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+            border-left: 4px solid var(--primary);
+        }
+
+        .menu-link.active::before {
+            width: 4px;
+        }
+
+        .menu-icon {
+            margin-right: 14px;
+            font-size: 20px;
+            width: 24px;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            width: calc(100% - 280px);
+            padding: 32px;
+            min-height: 100vh;
+        }
+
+        .top-bar {
+            background: var(--bg-secondary);
+            padding: 20px 32px;
+            border-radius: 12px;
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px var(--shadow);
+            border: 1px solid var(--border);
+            border-top: 3px solid var(--primary);
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: var(--bg-tertiary);
+            padding: 12px 20px;
+            border-radius: 8px;
+            width: 420px;
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .search-bar:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .search-bar input {
+            border: none;
+            background: transparent;
+            outline: none;
+            width: 100%;
+            margin-left: 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .search-bar input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .top-bar-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .theme-toggle {
+            width: 42px;
+            height: 42px;
+            border-radius: 8px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 8px 16px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .profile-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0, 102, 204, 0.3);
+        }
+
+        .user-info h4 {
+            font-size: 14px;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .user-info p {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .view {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            padding: 28px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+            border: 1px solid var(--border);
+            border-top: 3px solid transparent;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px var(--shadow-hover);
+        }
+
+        .stat-card.blue { border-top-color: #0066cc; }
+        .stat-card.green { border-top-color: #28a745; }
+        .stat-card.orange { border-top-color: #ff8c00; }
+        .stat-card.red { border-top-color: #dc3545; }
+        .stat-card.purple { border-top-color: #6f42c1; }
+
+        .stat-info h3 {
+            font-size: 36px;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .stat-info p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .stat-card.blue .stat-icon {
+            background: linear-gradient(135deg, #0066cc 0%, #004d99 100%);
+            color: white;
+        }
+
+        .stat-card.green .stat-icon {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+            color: white;
+        }
+
+        .stat-card.orange .stat-icon {
+            background: linear-gradient(135deg, #ff8c00 0%, #d97706 100%);
+            color: white;
+        }
+
+        .stat-card.red .stat-icon {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+
+        .stat-card.purple .stat-icon {
+            background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+            color: white;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 2px 8px var(--shadow);
+            margin-bottom: 28px;
+            border: 1px solid var(--border);
+            border-top: 3px solid var(--primary);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: 0.3px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            color: var(--text-primary);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px var(--shadow-hover);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: #1a1a2e;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            padding: 16px;
+            text-align: left;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        td {
+            padding: 18px 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        tr:hover {
+            background: var(--bg-tertiary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .student-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .student-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .student-details h4 {
+            font-size: 14px;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .student-details p {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-presente {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-ausente {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-tardanza {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.2s;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .action-btn.view {
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
+
+        .action-btn.edit {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .action-btn.delete {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 36px;
+            width: 90%;
+            max-width: 680px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 24px 48px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s ease;
+            border: 1px solid var(--border);
+            border-top: 4px solid var(--primary);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .modal-title {
+            font-size: 24px;
+            color: var(--text-primary);
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .close-btn {
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .close-btn:hover {
+            background: var(--danger);
+            color: white;
+            border-color: var(--danger);
+            transform: rotate(90deg);
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 28px;
+        }
+
+        .filters-card {
+            background: var(--bg-secondary);
+            padding: 28px 32px;
+            border-radius: 12px;
+            margin-bottom: 28px;
+            box-shadow: 0 2px 8px var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            align-items: end;
+        }
+
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: 100px repeat(6, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .schedule-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 16px 10px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .schedule-time {
+            background: var(--bg-tertiary);
+            padding: 16px 10px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 12px;
+            color: var(--text-primary);
+        }
+
+        .schedule-cell {
+            background: var(--bg-secondary);
+            padding: 12px;
+            min-height: 90px;
+            font-size: 12px;
+        }
+
+        .schedule-class {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .schedule-class.empty {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        .notification {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+            z-index: 9999;
+            color: white;
+            font-weight: 600;
+            animation: slideIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .notification.success {
+            background: var(--success);
+        }
+
+        .notification.error {
+            background: var(--danger);
+        }
+
+        .notification.warning {
+            background: var(--warning);
+            color: #1a1a2e;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            z-index: 1001;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-280px);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-bar {
+                width: 100%;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .schedule-grid {
+                grid-template-columns: 80px repeat(6, 130px);
+                overflow-x: auto;
+            }
+
+            .top-bar {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .sidebar-logo {
+                max-width: 120px;
+                height: 120px;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <button class="menu-toggle" onclick="toggleMobileMenu()">☰</button>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="logo_epis.jpg" 
+                 alt="Logo EPIS UNAJMA" 
+                 class="sidebar-logo">
+            <h2>EPIS - UNAJMA</h2>
+            <p>Sistema de Gestión Académica</p>
+        </div>
+        <ul class="sidebar-menu">
+            <li class="menu-item">
+                <a class="menu-link active" data-view="dashboard">
+                    <span class="menu-icon">📊</span>
+                    <span class="menu-text">Dashboard</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" data-view="estudiantes">
+                    <span class="menu-icon">👥</span>
+                    <span class="menu-text">Estudiantes</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" data-view="docentes">
+                    <span class="menu-icon">👨‍🏫</span>
+                    <span class="menu-text">Docentes</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" data-view="asignaturas">
+                    <span class="menu-icon">📚</span>
+                    <span class="menu-text">Asignaturas</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" data-view="calificaciones">
+                    <span class="menu-icon">📝</span>
+                    <span class="menu-text">Calificaciones</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" data-view="asistencias">
+                    <span class="menu-icon">✅</span>
+                    <span class="menu-text">Asistencias</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" data-view="horarios">
+                    <span class="menu-icon">🕒</span>
+                    <span class="menu-text">Horarios</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" data-view="reportes">
+                    <span class="menu-icon">📈</span>
+                    <span class="menu-text">Reportes</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" data-view="configuracion">
+                    <span class="menu-icon">⚙️</span>
+                    <span class="menu-text">Configuración</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <!-- Dashboard View -->
+        <div id="dashboard" class="view active">
+            <div class="top-bar">
+                <div class="search-bar">
+                    <span>🔍</span>
+                    <input type="text" placeholder="Buscar estudiantes, docentes, asignaturas..." id="globalSearch">
+                </div>
+                <div class="top-bar-actions">
+                    <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">🌙</button>
+                    <div class="user-profile">
+                        <div class="user-info">
+                            <h4>Administrador EPIS</h4>
+                            <p>Director de Escuela</p>
+                        </div>
+                        <div class="profile-pic">AD</div>
+                    </div>
+                </div>
+            </div>
+
+            <h1 class="page-title" style="margin-bottom: 32px;">Panel de Control</h1>
+
+            <div class="stats-grid">
+                <div class="stat-card blue">
+                    <div class="stat-info">
+                        <h3 id="totalStudents">0</h3>
+                        <p>Total Estudiantes</p>
+                    </div>
+                    <div class="stat-icon">👥</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-info">
+                        <h3 id="totalTeachers">0</h3>
+                        <p>Total Docentes</p>
+                    </div>
+                    <div class="stat-icon">👨‍🏫</div>
+                </div>
+                <div class="stat-card orange">
+                    <div class="stat-info">
+                        <h3 id="totalSubjects">0</h3>
+                        <p>Total Asignaturas</p>
+                    </div>
+                    <div class="stat-icon">📚</div>
+                </div>
+                <div class="stat-card red">
+                    <div class="stat-info">
+                        <h3 id="averageGrade">0</h3>
+                        <p>Promedio General</p>
+                    </div>
+                    <div class="stat-icon">📊</div>
+                </div>
+                <div class="stat-card purple">
+                    <div class="stat-info">
+                        <h3 id="attendanceRate">0%</h3>
+                        <p>Asistencia</p>
+                    </div>
+                    <div class="stat-icon">✅</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Estudiantes Destacados</h3>
+                    <button class="btn btn-primary" onclick="navigateToView('estudiantes')">Ver Todos</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Estudiante</th>
+                                <th>Código</th>
+                                <th>Ciclo</th>
+                                <th>Promedio</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashboardStudentTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estudiantes View -->
+        <div id="estudiantes" class="view">
+            <div class="page-header">
+                <h1 class="page-title">Gestión de Estudiantes</h1>
+                <button class="btn btn-primary" onclick="openModal('student', 'add')">+ Agregar</button>
+            </div>
+
+            <div class="filters-card">
+                <div class="filters-grid">
+                    <div class="form-group">
+                        <label>Buscar</label>
+                        <input type="text" id="searchStudent" placeholder="Nombre o código...">
+                    </div>
+                    <div class="form-group">
+                        <label>Ciclo</label>
+                        <select id="filterCycle">
+                            <option value="">Todos</option>
+                            <option value="I">I</option>
+                            <option value="II">II</option>
+                            <option value="III">III</option>
+                            <option value="IV">IV</option>
+                            <option value="V">V</option>
+                            <option value="VI">VI</option>
+                            <option value="VII">VII</option>
+                            <option value="VIII">VIII</option>
+                            <option value="IX">IX</option>
+                            <option value="X">X</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select id="filterStatus">
+                            <option value="">Todos</option>
+                            <option value="Activo">Activo</option>
+                            <option value="Inactivo">Inactivo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary" onclick="applyStudentFilters()">Filtrar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Lista de Estudiantes (<span id="studentCount">0</span>)</h2>
+                    <button class="btn btn-secondary" onclick="exportStudentsToCSV()">📥 Exportar</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Estudiante</th>
+                                <th>Código</th>
+                                <th>DNI</th>
+                                <th>Ciclo</th>
+                                <th>Promedio</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Docentes View -->
+        <div id="docentes" class="view">
+            <div class="page-header">
+                <h1 class="page-title">Gestión de Docentes</h1>
+                <button class="btn btn-primary" onclick="openModal('teacher', 'add')">+ Agregar</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Lista de Docentes (<span id="teacherCount">0</span>)</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Docente</th>
+                                <th>Código</th>
+                                <th>Especialidad</th>
+                                <th>Email</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teachersTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Asignaturas View -->
+        <div id="asignaturas" class="view">
+            <div class="page-header">
+                <h1 class="page-title">Gestión de Asignaturas</h1>
+                <button class="btn btn-primary" onclick="openModal('subject', 'add')">+ Agregar</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Lista de Asignaturas (<span id="subjectCount">0</span>)</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Asignatura</th>
+                                <th>Ciclo</th>
+                                <th>Créditos</th>
+                                <th>Docente</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subjectsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calificaciones View -->
+        <div id="calificaciones" class="view">
+            <div class="page-header">
+                <h1 class="page-title">Gestión de Calificaciones</h1>
+                <button class="btn btn-primary" onclick="openModal('grade', 'add')">+ Registrar</button>
+            </div>
+
+            <div class="filters-card">
+                <div class="filters-grid">
+                    <div class="form-group">
+                        <label>Ciclo</label>
+                        <select id="gradeFilterCycle">
+                            <option value="">Todos</option>
+                            <option value="I">I</option>
+                            <option value="II">II</option>
+                            <option value="III">III</option>
+                            <option value="IV">IV</option>
+                            <option value="V">V</option>
+                            <option value="VI">VI</option>
+                            <option value="VII">VII</option>
+                            <option value="VIII">VIII</option>
+                            <option value="IX">IX</option>
+                            <option value="X">X</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Asignatura</label>
+                        <select id="gradeFilterSubject">
+                            <option value="">Todas</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary" onclick="filterGrades()">Filtrar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Calificaciones Registradas</h2>
+                </div>
+                <div class="table-container" id="gradesContainer"></div>
+            </div>
+        </div>
+
+        <!-- Asistencias View -->
+        <div id="asistencias" class="view">
+            <div class="page-header">
+                <h1 class="page-title">Control de Asistencias</h1>
+                <button class="btn btn-primary" onclick="openModal('attendance', 'add')">+ Registrar</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Registro de Asistencias</h2>
+                </div>
+                
+                <div class="filters-grid" style="margin-bottom: 28px;">
+                    <div class="form-group">
+                        <label>Fecha</label>
+                        <input type="date" id="attendanceDate" value="">
+                    </div>
+                    <div class="form-group">
+                        <label>Asignatura</label>
+                        <select id="attendanceSubject">
+                            <option value="">Seleccionar...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary" onclick="loadAttendanceByDate()">Buscar</button>
+                    </div>
+                </div>
+
+                <div class="table-container" id="attendanceContainer"></div>
+            </div>
+        </div>
+
+        <!-- Horarios View -->
+        <div id="horarios" class="view">
+            <div class="page-header">
+                <h1 class="page-title">Horarios de Clases</h1>
+                <button class="btn btn-primary" onclick="openModal('schedule', 'add')">+ Agregar</button>
+            </div>
+
+            <div class="filters-card">
+                <div class="filters-grid">
+                    <div class="form-group">
+                        <label>Ciclo</label>
+                        <select id="scheduleFilterCycle" onchange="loadSchedule()">
+                            <option value="">Todos</option>
+                            <option value="I">I</option>
+                            <option value="II">II</option>
+                            <option value="III">III</option>
+                            <option value="IV">IV</option>
+                            <option value="V">V</option>
+                            <option value="VI">VI</option>
+                            <option value="VII">VII</option>
+                            <option value="VIII">VIII</option>
+                            <option value="IX">IX</option>
+                            <option value="X">X</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Horario - <span id="currentCycle">Todos los Ciclos</span></h2>
+                    <button class="btn btn-secondary" onclick="exportScheduleToPDF()">📄 Exportar</button>
+                </div>
+                <div id="scheduleGrid"></div>
+            </div>
+        </div>
+
+        <!-- Reportes View -->
+        <div id="reportes" class="view">
+            <div class="page-header">
+                <h1 class="page-title">Reportes Académicos</h1>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card blue">
+                    <div class="stat-info">
+                        <h3 id="reportAverage">0</h3>
+                        <p>Promedio General</p>
+                    </div>
+                    <div class="stat-icon">📊</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-info">
+                        <h3 id="reportActive">0</h3>
+                        <p>Estudiantes Activos</p>
+                    </div>
+                    <div class="stat-icon">✅</div>
+                </div>
+                <div class="stat-card orange">
+                    <div class="stat-info">
+                        <h3 id="reportBestStudent">-</h3>
+                        <p>Mejor Promedio</p>
+                    </div>
+                    <div class="stat-icon">🏆</div>
+                </div>
+                <div class="stat-card purple">
+                    <div class="stat-info">
+                        <h3 id="reportAttendance">0%</h3>
+                        <p>Asistencia</p>
+                    </div>
+                    <div class="stat-icon">📅</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Generar Reportes</h2>
+                </div>
+                <div class="filters-grid">
+                    <div class="form-group">
+                        <label>Tipo</label>
+                        <select id="reportType">
+                            <option>Reporte de Estudiantes</option>
+                            <option>Reporte de Calificaciones</option>
+                            <option>Reporte de Asistencias</option>
+                            <option>Reporte de Docentes</option>
+                            <option>Reporte Completo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Formato</label>
+                        <select id="reportFormat">
+                            <option>CSV</option>
+                            <option>JSON</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary" onclick="generateReport()">Generar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuración View -->
+        <div id="configuracion" class="view">
+            <div class="page-header">
+                <h1 class="page-title">Configuración del Sistema</h1>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Gestión de Datos</h2>
+                </div>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button class="btn btn-success" onclick="backupData()">📤 Respaldar</button>
+                    <button class="btn btn-primary" onclick="restoreData()">📥 Restaurar</button>
+                    <button class="btn btn-danger" onclick="clearAllData()">🗑️ Limpiar</button>
+                </div>
+                <p style="margin-top: 20px; color: var(--text-secondary); font-size: 14px;">
+                    Total de registros: <strong><span id="totalRecords">0</span></strong>
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Información de la Facultad</h2>
+                </div>
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" id="facultyName" value="Facultad de Ingeniería">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Año Académico</label>
+                        <input type="text" id="academicYear" value="2025">
+                    </div>
+                    <div class="form-group">
+                        <label>Nota Mínima</label>
+                        <input type="number" id="minGrade" value="10.5" min="0" max="20" step="0.5">
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="saveConfiguration()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modales -->
+    <div class="modal" id="studentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="studentModalTitle">Agregar Estudiante</h2>
+                <button class="close-btn" onclick="closeModal('studentModal')">×</button>
+            </div>
+            <form id="studentForm" onsubmit="handleStudentSubmit(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nombres *</label>
+                        <input type="text" id="studentFirstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Apellidos *</label>
+                        <input type="text" id="studentLastName" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>DNI *</label>
+                        <input type="text" id="studentDNI" maxlength="8" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Código *</label>
+                        <input type="text" id="studentCode" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" id="studentEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono *</label>
+                        <input type="tel" id="studentPhone" maxlength="9" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Ciclo *</label>
+                        <select id="studentCycle" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="I">I</option>
+                            <option value="II">II</option>
+                            <option value="III">III</option>
+                            <option value="IV">IV</option>
+                            <option value="V">V</option>
+                            <option value="VI">VI</option>
+                            <option value="VII">VII</option>
+                            <option value="VIII">VIII</option>
+                            <option value="IX">IX</option>
+                            <option value="X">X</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado *</label>
+                        <select id="studentStatus" required>
+                            <option value="Activo">Activo</option>
+                            <option value="Inactivo">Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('studentModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="teacherModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="teacherModalTitle">Agregar Docente</h2>
+                <button class="close-btn" onclick="closeModal('teacherModal')">×</button>
+            </div>
+            <form id="teacherForm" onsubmit="handleTeacherSubmit(event)">
+                <div class="form-group">
+                    <label>Nombre Completo *</label>
+                    <input type="text" id="teacherName" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>DNI *</label>
+                        <input type="text" id="teacherDNI" maxlength="8" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Código *</label>
+                        <input type="text" id="teacherCode" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Especialidad *</label>
+                        <input type="text" id="teacherSpecialty" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Grado *</label>
+                        <select id="teacherDegree" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="Licenciado">Licenciado</option>
+                            <option value="Magíster">Magíster</option>
+                            <option value="Doctor">Doctor</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" id="teacherEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono *</label>
+                        <input type="tel" id="teacherPhone" maxlength="9" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Estado *</label>
+                    <select id="teacherStatus" required>
+                        <option value="Activo">Activo</option>
+                        <option value="Inactivo">Inactivo</option>
+                    </select>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('teacherModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="subjectModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="subjectModalTitle">Agregar Asignatura</h2>
+                <button class="close-btn" onclick="closeModal('subjectModal')">×</button>
+            </div>
+            <form id="subjectForm" onsubmit="handleSubjectSubmit(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Código *</label>
+                        <input type="text" id="subjectCode" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre *</label>
+                        <input type="text" id="subjectName" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Ciclo *</label>
+                        <select id="subjectCycle" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="I">I</option>
+                            <option value="II">II</option>
+                            <option value="III">III</option>
+                            <option value="IV">IV</option>
+                            <option value="V">V</option>
+                            <option value="VI">VI</option>
+                            <option value="VII">VII</option>
+                            <option value="VIII">VIII</option>
+                            <option value="IX">IX</option>
+                            <option value="X">X</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Créditos *</label>
+                        <input type="number" id="subjectCredits" min="1" max="6" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Docente *</label>
+                    <select id="subjectTeacher" required>
+                        <option value="">Seleccionar...</option>
+                    </select>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('subjectModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="gradeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Registrar Calificación</h2>
+                <button class="close-btn" onclick="closeModal('gradeModal')">×</button>
+            </div>
+            <form id="gradeForm" onsubmit="handleGradeSubmit(event)">
+                <div class="form-group">
+                    <label>Estudiante *</label>
+                    <select id="gradeStudent" required>
+                        <option value="">Seleccionar...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Asignatura *</label>
+                    <select id="gradeSubject" required>
+                        <option value="">Seleccionar...</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tipo *</label>
+                        <select id="gradeType" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="Parcial 1">Parcial 1</option>
+                            <option value="Parcial 2">Parcial 2</option>
+                            <option value="Final">Final</option>
+                            <option value="Práctica">Práctica</option>
+                            <option value="Trabajo">Trabajo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Peso (%) *</label>
+                        <input type="number" id="gradeWeight" min="1" max="100" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Nota (0-20) *</label>
+                    <input type="number" id="gradeValue" min="0" max="20" step="0.1" required>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('gradeModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Registrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="attendanceModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Registrar Asistencia</h2>
+                <button class="close-btn" onclick="closeModal('attendanceModal')">×</button>
+            </div>
+            <form id="attendanceForm" onsubmit="handleAttendanceSubmit(event)">
+                <div class="form-group">
+                    <label>Fecha *</label>
+                    <input type="date" id="attendanceFormDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Asignatura *</label>
+                    <select id="attendanceFormSubject" required>
+                        <option value="">Seleccionar...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Estudiante *</label>
+                    <select id="attendanceFormStudent" required>
+                        <option value="">Seleccionar...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Estado *</label>
+                    <select id="attendanceStatus" required>
+                        <option value="Presente">Presente</option>
+                        <option value="Ausente">Ausente</option>
+                        <option value="Tardanza">Tardanza</option>
+                    </select>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('attendanceModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Registrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="scheduleModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Agregar Horario</h2>
+                <button class="close-btn" onclick="closeModal('scheduleModal')">×</button>
+            </div>
+            <form id="scheduleForm" onsubmit="handleScheduleSubmit(event)">
+                <div class="form-group">
+                    <label>Asignatura *</label>
+                    <select id="scheduleSubject" required>
+                        <option value="">Seleccionar...</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Día *</label>
+                        <select id="scheduleDay" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="Lunes">Lunes</option>
+                            <option value="Martes">Martes</option>
+                            <option value="Miércoles">Miércoles</option>
+                            <option value="Jueves">Jueves</option>
+                            <option value="Viernes">Viernes</option>
+                            <option value="Sábado">Sábado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Hora *</label>
+                        <select id="scheduleTime" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="7:00-9:00">7:00 - 9:00</option>
+                            <option value="9:00-11:00">9:00 - 11:00</option>
+                            <option value="11:00-13:00">11:00 - 13:00</option>
+                            <option value="15:00-17:00">15:00 - 17:00</option>
+                            <option value="17:00-19:00">17:00 - 19:00</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Aula *</label>
+                    <input type="text" id="scheduleClassroom" placeholder="Ej: Aula 102" required>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('scheduleModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ========== VARIABLES GLOBALES ==========
+        let students = [];
+        let teachers = [];
+        let subjects = [];
+        let gradesData = {};
+        let attendanceData = [];
+        let scheduleData = [];
+        let currentEditId = null;
+
+        // ========== LOCALSTORAGE ==========
+        function saveToLocalStorage() {
+            localStorage.setItem('students', JSON.stringify(students));
+            localStorage.setItem('teachers', JSON.stringify(teachers));
+            localStorage.setItem('subjects', JSON.stringify(subjects));
+            localStorage.setItem('gradesData', JSON.stringify(gradesData));
+            localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
+            localStorage.setItem('scheduleData', JSON.stringify(scheduleData));
+        }
+
+        function loadFromLocalStorage() {
+            const savedStudents = localStorage.getItem('students');
+            const savedTeachers = localStorage.getItem('teachers');
+            const savedSubjects = localStorage.getItem('subjects');
+            const savedGrades = localStorage.getItem('gradesData');
+            const savedAttendance = localStorage.getItem('attendanceData');
+            const savedSchedule = localStorage.getItem('scheduleData');
+
+            if (savedStudents) students = JSON.parse(savedStudents);
+            if (savedTeachers) teachers = JSON.parse(savedTeachers);
+            if (savedSubjects) subjects = JSON.parse(savedSubjects);
+            if (savedGrades) gradesData = JSON.parse(savedGrades);
+            if (savedAttendance) attendanceData = JSON.parse(savedAttendance);
+            if (savedSchedule) scheduleData = JSON.parse(savedSchedule);
+
+            if (students.length === 0) {
+                students = [
+                    { code: '202210123', firstName: 'Juan Carlos', lastName: 'Pérez García', dni: '72345678', cycle: 'V', average: 16.5, phone: '987654321', email: 'juan.perez@unajma.edu.pe', status: 'Activo' },
+                    { code: '202210124', firstName: 'María Isabel', lastName: 'López Torres', dni: '73456789', cycle: 'V', average: 17.8, phone: '987123456', email: 'maria.lopez@unajma.edu.pe', status: 'Activo' },
+                    { code: '202110145', firstName: 'Carlos Alberto', lastName: 'Ruiz Mendoza', dni: '74567890', cycle: 'VII', average: 15.2, phone: '965432178', email: 'carlos.ruiz@unajma.edu.pe', status: 'Activo' }
+                ];
+            }
+
+            if (teachers.length === 0) {
+                teachers = [
+                    { code: 'DOC001', name: 'Dr. Roberto García Romero', dni: '41111111', specialty: 'Ingeniería de Software', degree: 'Doctor', phone: '999111111', email: 'r.garcia@unajma.edu.pe', status: 'Activo' },
+                    { code: 'DOC002', name: 'Mg. Ana Martínez Silva', dni: '42222222', specialty: 'Bases de Datos', degree: 'Magíster', phone: '999222222', email: 'a.martinez@unajma.edu.pe', status: 'Activo' }
+                ];
+            }
+
+            if (subjects.length === 0) {
+                subjects = [
+                    { code: 'IS501', name: 'Ingeniería de Software I', cycle: 'V', credits: 4, teacher: 'Dr. Roberto García Romero' },
+                    { code: 'BD501', name: 'Bases de Datos', cycle: 'V', credits: 4, teacher: 'Mg. Ana Martínez Silva' }
+                ];
+            }
+
+            if (Object.keys(gradesData).length === 0) {
+                gradesData = {
+                    '202210123': {
+                        'Ingeniería de Software I': [
+                            { type: 'Parcial 1', grade: 16, weight: 30 },
+                            { type: 'Parcial 2', grade: 17, weight: 30 },
+                            { type: 'Final', grade: 18, weight: 40 }
+                        ]
+                    }
+                };
+            }
+
+            saveToLocalStorage();
+        }
+
+        // ========== NOTIFICACIONES ==========
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : '⚠';
+            notification.innerHTML = `<span style="font-size: 20px;">${icon}</span> ${message}`;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        // ========== TEMA ==========
+        function toggleTheme() {
+            const body = document.body;
+            const themeToggle = document.getElementById('themeToggle');
+            const currentTheme = body.getAttribute('data-theme');
+            
+            if (currentTheme === 'light') {
+                body.setAttribute('data-theme', 'dark');
+                themeToggle.textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.setAttribute('data-theme', 'light');
+                themeToggle.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        // ========== NAVEGACIÓN ==========
+        function navigateToView(viewName) {
+            document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
+            document.getElementById(viewName).classList.add('active');
+
+            document.querySelectorAll('.menu-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('data-view') === viewName) {
+                    link.classList.add('active');
+                }
+            });
+
+            loadViewData(viewName);
+
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('mobile-open');
+            }
+        }
+
+        function loadViewData(viewName) {
+            switch(viewName) {
+                case 'dashboard': loadDashboardData(); break;
+                case 'estudiantes': loadStudents(); break;
+                case 'docentes': loadTeachers(); break;
+                case 'asignaturas': loadSubjects(); break;
+                case 'calificaciones': loadGrades(); break;
+                case 'asistencias': loadAttendances(); break;
+                case 'horarios': loadSchedule(); break;
+                case 'reportes': loadReports(); break;
+                case 'configuracion': loadConfiguration(); break;
+            }
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
+        }
+
+        // ========== DASHBOARD ==========
+        function loadDashboardData() {
+            document.getElementById('totalStudents').textContent = students.length;
+            document.getElementById('totalTeachers').textContent = teachers.length;
+            document.getElementById('totalSubjects').textContent = subjects.length;
+
+            const avgGrade = students.reduce((sum, s) => sum + s.average, 0) / (students.length || 1);
+            document.getElementById('averageGrade').textContent = avgGrade.toFixed(1);
+
+            const totalAttendance = attendanceData.length;
+            const presentCount = attendanceData.filter(a => a.status === 'Presente').length;
+            const attendanceRate = totalAttendance > 0 ? (presentCount / totalAttendance * 100) : 0;
+            document.getElementById('attendanceRate').textContent = attendanceRate.toFixed(0) + '%';
+
+            const tbody = document.getElementById('dashboardStudentTable');
+            tbody.innerHTML = '';
+
+            students.slice(0, 5).forEach(student => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>
+                            <div class="student-info">
+                                <div class="student-avatar">${student.firstName[0]}${student.lastName[0]}</div>
+                                <div class="student-details">
+                                    <h4>${student.firstName} ${student.lastName}</h4>
+                                    <p>${student.email}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td><strong>${student.code}</strong></td>
+                        <td>${student.cycle}</td>
+                        <td><strong>${student.average.toFixed(1)}</strong></td>
+                        <td><span class="status-badge ${student.status === 'Activo' ? 'status-active' : 'status-inactive'}">${student.status}</span></td>
+                    </tr>
+                `;
+            });
+        }
+
+        // ========== ESTUDIANTES ==========
+        function loadStudents() {
+            const tbody = document.getElementById('studentsTable');
+            tbody.innerHTML = '';
+            document.getElementById('studentCount').textContent = students.length;
+
+            if (students.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px;">No hay estudiantes</td></tr>';
+                return;
+            }
+
+            students.forEach(student => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>
+                            <div class="student-info">
+                                <div class="student-avatar">${student.firstName[0]}${student.lastName[0]}</div>
+                                <div class="student-details">
+                                    <h4>${student.firstName} ${student.lastName}</h4>
+                                    <p>${student.email}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td><strong>${student.code}</strong></td>
+                        <td>${student.dni}</td>
+                        <td>${student.cycle}</td>
+                        <td><strong>${student.average.toFixed(1)}</strong></td>
+                        <td><span class="status-badge ${student.status === 'Activo' ? 'status-active' : 'status-inactive'}">${student.status}</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn edit" onclick="editStudent('${student.code}')">Editar</button>
+                                <button class="action-btn delete" onclick="deleteStudent('${student.code}')">Eliminar</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // ✅ CORRECCIÓN: Filtros funcionales
+        function applyStudentFilters() {
+            const searchTerm = document.getElementById('searchStudent').value.toLowerCase();
+            const filterCycle = document.getElementById('filterCycle').value;
+            const filterStatus = document.getElementById('filterStatus').value;
+
+            let filtered = students;
+
+            if (searchTerm) {
+                filtered = filtered.filter(s => 
+                    s.firstName.toLowerCase().includes(searchTerm) ||
+                    s.lastName.toLowerCase().includes(searchTerm) ||
+                    s.code.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            if (filterCycle) {
+                filtered = filtered.filter(s => s.cycle === filterCycle);
+            }
+
+            if (filterStatus) {
+                filtered = filtered.filter(s => s.status === filterStatus);
+            }
+
+            const tbody = document.getElementById('studentsTable');
+            tbody.innerHTML = '';
+            document.getElementById('studentCount').textContent = filtered.length;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px;">No se encontraron resultados</td></tr>';
+                return;
+            }
+
+            filtered.forEach(student => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>
+                            <div class="student-info">
+                                <div class="student-avatar">${student.firstName[0]}${student.lastName[0]}</div>
+                                <div class="student-details">
+                                    <h4>${student.firstName} ${student.lastName}</h4>
+                                    <p>${student.email}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td><strong>${student.code}</strong></td>
+                        <td>${student.dni}</td>
+                        <td>${student.cycle}</td>
+                        <td><strong>${student.average.toFixed(1)}</strong></td>
+                        <td><span class="status-badge ${student.status === 'Activo' ? 'status-active' : 'status-inactive'}">${student.status}</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn edit" onclick="editStudent('${student.code}')">Editar</button>
+                                <button class="action-btn delete" onclick="deleteStudent('${student.code}')">Eliminar</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            if (searchTerm || filterCycle || filterStatus) {
+                showNotification(`${filtered.length} resultado${filtered.length !== 1 ? 's' : ''} encontrado${filtered.length !== 1 ? 's' : ''}`, 'success');
+            }
+        }
+
+        function editStudent(code) {
+            const student = students.find(s => s.code === code);
+            if (student) {
+                document.getElementById('studentFirstName').value = student.firstName;
+                document.getElementById('studentLastName').value = student.lastName;
+                document.getElementById('studentDNI').value = student.dni;
+                document.getElementById('studentCode').value = student.code;
+                document.getElementById('studentEmail').value = student.email;
+                document.getElementById('studentPhone').value = student.phone;
+                document.getElementById('studentCycle').value = student.cycle;
+                document.getElementById('studentStatus').value = student.status;
+                currentEditId = code;
+                document.getElementById('studentModalTitle').textContent = 'Editar Estudiante';
+                document.getElementById('studentModal').classList.add('active');
+            }
+        }
+
+        function deleteStudent(code) {
+            const student = students.find(s => s.code === code);
+            if (confirm(`¿Eliminar a ${student.firstName} ${student.lastName}?`)) {
+                students = students.filter(s => s.code !== code);
+                delete gradesData[code];
+                saveToLocalStorage();
+                loadStudents();
+                showNotification('Estudiante eliminado', 'success');
+            }
+        }
+
+        function exportStudentsToCSV() {
+            let csv = 'Código,Nombre,Apellido,DNI,Ciclo,Promedio,Teléfono,Email,Estado\n';
+            students.forEach(s => {
+                csv += `${s.code},"${s.firstName}","${s.lastName}",${s.dni},${s.cycle},${s.average},${s.phone},"${s.email}",${s.status}\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `estudiantes_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            showNotification('CSV exportado', 'success');
+        }
+
+        // ========== DOCENTES ==========
+        function loadTeachers() {
+            const tbody = document.getElementById('teachersTable');
+            tbody.innerHTML = '';
+            document.getElementById('teacherCount').textContent = teachers.length;
+
+            if (teachers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:40px;">No hay docentes</td></tr>';
+                return;
+            }
+
+            teachers.forEach(teacher => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>
+                            <div class="student-info">
+                                <div class="student-avatar">${teacher.name.substring(0, 2)}</div>
+                                <div class="student-details">
+                                    <h4>${teacher.name}</h4>
+                                    <p>${teacher.degree}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td><strong>${teacher.code}</strong></td>
+                        <td>${teacher.specialty}</td>
+                        <td>${teacher.email}</td>
+                        <td><span class="status-badge status-active">${teacher.status}</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn edit" onclick="editTeacher('${teacher.code}')">Editar</button>
+                                <button class="action-btn delete" onclick="deleteTeacher('${teacher.code}')">Eliminar</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function editTeacher(code) {
+            const teacher = teachers.find(t => t.code === code);
+            if (teacher) {
+                document.getElementById('teacherName').value = teacher.name;
+                document.getElementById('teacherDNI').value = teacher.dni;
+                document.getElementById('teacherCode').value = teacher.code;
+                document.getElementById('teacherSpecialty').value = teacher.specialty;
+                document.getElementById('teacherDegree').value = teacher.degree;
+                document.getElementById('teacherEmail').value = teacher.email;
+                document.getElementById('teacherPhone').value = teacher.phone;
+                document.getElementById('teacherStatus').value = teacher.status;
+                currentEditId = code;
+                document.getElementById('teacherModalTitle').textContent = 'Editar Docente';
+                document.getElementById('teacherModal').classList.add('active');
+            }
+        }
+
+        function deleteTeacher(code) {
+            const teacher = teachers.find(t => t.code === code);
+            if (confirm(`¿Eliminar a ${teacher.name}?`)) {
+                teachers = teachers.filter(t => t.code !== code);
+                saveToLocalStorage();
+                loadTeachers();
+                showNotification('Docente eliminado', 'success');
+            }
+        }
+
+        // ========== ASIGNATURAS ==========
+        function loadSubjects() {
+            const tbody = document.getElementById('subjectsTable');
+            tbody.innerHTML = '';
+            document.getElementById('subjectCount').textContent = subjects.length;
+
+            const teacherSelect = document.getElementById('subjectTeacher');
+            teacherSelect.innerHTML = '<option value="">Seleccionar...</option>';
+            teachers.forEach(t => {
+                teacherSelect.innerHTML += `<option value="${t.name}">${t.name}</option>`;
+            });
+
+            if (subjects.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:40px;">No hay asignaturas</td></tr>';
+                return;
+            }
+
+            subjects.forEach(subject => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${subject.code}</strong></td>
+                        <td>${subject.name}</td>
+                        <td>${subject.cycle}</td>
+                        <td>${subject.credits}</td>
+                        <td>${subject.teacher}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn edit" onclick="editSubject('${subject.code}')">Editar</button>
+                                <button class="action-btn delete" onclick="deleteSubject('${subject.code}')">Eliminar</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function editSubject(code) {
+            const subject = subjects.find(s => s.code === code);
+            if (subject) {
+                document.getElementById('subjectCode').value = subject.code;
+                document.getElementById('subjectName').value = subject.name;
+                document.getElementById('subjectCycle').value = subject.cycle;
+                document.getElementById('subjectCredits').value = subject.credits;
+                document.getElementById('subjectTeacher').value = subject.teacher;
+                currentEditId = code;
+                document.getElementById('subjectModalTitle').textContent = 'Editar Asignatura';
+                document.getElementById('subjectModal').classList.add('active');
+            }
+        }
+
+        function deleteSubject(code) {
+            const subject = subjects.find(s => s.code === code);
+            if (confirm(`¿Eliminar ${subject.name}?`)) {
+                subjects = subjects.filter(s => s.code !== code);
+                saveToLocalStorage();
+                loadSubjects();
+                showNotification('Asignatura eliminada', 'success');
+            }
+        }
+
+        // ========== CALIFICACIONES ==========
+        function loadGrades() {
+            const container = document.getElementById('gradesContainer');
+            
+            const studentSelect = document.getElementById('gradeStudent');
+            const subjectSelect = document.getElementById('gradeSubject');
+            const filterSubjectSelect = document.getElementById('gradeFilterSubject');
+            
+            studentSelect.innerHTML = '<option value="">Seleccionar...</option>';
+            students.forEach(s => {
+                studentSelect.innerHTML += `<option value="${s.code}">${s.firstName} ${s.lastName}</option>`;
+            });
+
+            subjectSelect.innerHTML = '<option value="">Seleccionar...</option>';
+            filterSubjectSelect.innerHTML = '<option value="">Todas</option>';
+            subjects.forEach(s => {
+                subjectSelect.innerHTML += `<option value="${s.name}">${s.name}</option>`;
+                filterSubjectSelect.innerHTML += `<option value="${s.name}">${s.name}</option>`;
+            });
+
+            let html = '<table><thead><tr><th>Estudiante</th><th>Asignatura</th><th>Evaluación</th><th>Peso</th><th>Nota</th></tr></thead><tbody>';
+            
+            let hasGrades = false;
+            Object.keys(gradesData).forEach(studentCode => {
+                const student = students.find(s => s.code === studentCode);
+                if (student) {
+                    Object.keys(gradesData[studentCode]).forEach(subject => {
+                        gradesData[studentCode][subject].forEach(grade => {
+                            hasGrades = true;
+                            html += `
+                                <tr>
+                                    <td>${student.firstName} ${student.lastName}</td>
+                                    <td>${subject}</td>
+                                    <td>${grade.type}</td>
+                                    <td>${grade.weight}%</td>
+                                    <td><strong>${grade.grade}</strong></td>
+                                </tr>
+                            `;
+                        });
+                    });
+                }
+            });
+
+            if (!hasGrades) {
+                html += '<tr><td colspan="5" style="text-align:center; padding:40px;">No hay calificaciones</td></tr>';
+            }
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function filterGrades() {
+            loadGrades();
+        }
+
+        function calculateAverage(grades) {
+            let total = 0, totalWeight = 0;
+            grades.forEach(g => {
+                total += g.grade * g.weight;
+                totalWeight += g.weight;
+            });
+            return (total / totalWeight).toFixed(2);
+        }
+
+        function updateStudentAverage(studentCode) {
+            const studentGrades = gradesData[studentCode] || {};
+            let totalAvg = 0, subjectCount = 0;
+
+            Object.keys(studentGrades).forEach(subject => {
+                const avg = parseFloat(calculateAverage(studentGrades[subject]));
+                totalAvg += avg;
+                subjectCount++;
+            });
+
+            if (subjectCount > 0) {
+                const student = students.find(s => s.code === studentCode);
+                if (student) {
+                    student.average = totalAvg / subjectCount;
+                    saveToLocalStorage();
+                }
+            }
+        }
+
+        // ========== ASISTENCIAS ==========
+        function loadAttendances() {
+            const subjectSelect = document.getElementById('attendanceSubject');
+            const formSubjectSelect = document.getElementById('attendanceFormSubject');
+            const studentSelect = document.getElementById('attendanceFormStudent');
+            
+            subjectSelect.innerHTML = '<option value="">Seleccionar...</option>';
+            formSubjectSelect.innerHTML = '<option value="">Seleccionar...</option>';
+            subjects.forEach(s => {
+                subjectSelect.innerHTML += `<option value="${s.name}">${s.name}</option>`;
+                formSubjectSelect.innerHTML += `<option value="${s.name}">${s.name}</option>`;
+            });
+
+            studentSelect.innerHTML = '<option value="">Seleccionar...</option>';
+            students.forEach(s => {
+                studentSelect.innerHTML += `<option value="${s.code}">${s.firstName} ${s.lastName}</option>`;
+            });
+
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('attendanceDate').value = today;
+            document.getElementById('attendanceFormDate').value = today;
+        }
+
+        function loadAttendanceByDate() {
+            const date = document.getElementById('attendanceDate').value;
+            const subject = document.getElementById('attendanceSubject').value;
+            
+            if (!date || !subject) {
+                showNotification('Seleccione fecha y asignatura', 'warning');
+                return;
+            }
+
+            const filtered = attendanceData.filter(a => a.date === date && a.subject === subject);
+            const container = document.getElementById('attendanceContainer');
+            
+            if (filtered.length === 0) {
+                container.innerHTML = '<p style="text-align:center; padding:40px;">No hay registros</p>';
+                return;
+            }
+
+            let html = '<table><thead><tr><th>Estudiante</th><th>Asignatura</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>';
+            
+            filtered.forEach(attendance => {
+                const student = students.find(s => s.code === attendance.studentCode);
+                if (student) {
+                    html += `
+                        <tr>
+                            <td>${student.firstName} ${student.lastName}</td>
+                            <td>${attendance.subject}</td>
+                            <td>${attendance.date}</td>
+                            <td><span class="status-badge status-${attendance.status.toLowerCase()}">${attendance.status}</span></td>
+                        </tr>
+                    `;
+                }
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // ========== HORARIOS ==========
+        function loadSchedule() {
+            const cycle = document.getElementById('scheduleFilterCycle').value;
+            document.getElementById('currentCycle').textContent = cycle ? `${cycle} Ciclo` : 'Todos los Ciclos';
+
+            const scheduleSubjectSelect = document.getElementById('scheduleSubject');
+            scheduleSubjectSelect.innerHTML = '<option value="">Seleccionar...</option>';
+            
+            const filteredSubjects = cycle ? subjects.filter(s => s.cycle === cycle) : subjects;
+            
+            filteredSubjects.forEach(s => {
+                scheduleSubjectSelect.innerHTML += `<option value="${s.name}" data-cycle="${s.cycle}">${s.name} (Ciclo ${s.cycle})</option>`;
+            });
+
+            if (filteredSubjects.length === 0) {
+                scheduleSubjectSelect.innerHTML = '<option value="">No hay asignaturas disponibles</option>';
+            }
+
+            const filtered = cycle 
+                ? scheduleData.filter(s => {
+                    const subject = subjects.find(sub => sub.name === s.subject);
+                    return subject && subject.cycle === cycle;
+                })
+                : scheduleData;
+
+            const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+            const times = ['7:00-9:00', '9:00-11:00', '11:00-13:00', '15:00-17:00', '17:00-19:00'];
+
+            let html = '<div class="schedule-grid">';
+            
+            html += '<div class="schedule-header">Hora</div>';
+            days.forEach(day => {
+                html += `<div class="schedule-header">${day}</div>`;
+            });
+
+            times.forEach(time => {
+                html += `<div class="schedule-time">${time}</div>`;
+                days.forEach(day => {
+                    const classItem = filtered.find(s => s.day === day && s.time === time);
+                    if (classItem) {
+                        html += `
+                            <div class="schedule-cell">
+                                <div class="schedule-class">
+                                    <div><strong>${classItem.subject}</strong></div>
+                                    <div style="font-size: 11px; margin-top: 5px;">${classItem.classroom}</div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        html += `
+                            <div class="schedule-cell">
+                                <div class="schedule-class empty">Libre</div>
+                            </div>
+                        `;
+                    }
+                });
+            });
+
+            html += '</div>';
+            document.getElementById('scheduleGrid').innerHTML = html;
+        }
+
+        function exportScheduleToPDF() {
+            showNotification('Función en desarrollo', 'warning');
+        }
+
+        // ========== REPORTES ==========
+        function loadReports() {
+            const activeStudents = students.filter(s => s.status === 'Activo').length;
+            const avgGrade = students.reduce((sum, s) => sum + s.average, 0) / (students.length || 1);
+            const bestStudent = students.reduce((max, s) => s.average > max.average ? s : max, students[0] || {average: 0});
+
+            const totalAttendance = attendanceData.length;
+            const presentCount = attendanceData.filter(a => a.status === 'Presente').length;
+            const attendanceRate = totalAttendance > 0 ? (presentCount / totalAttendance * 100) : 0;
+
+            document.getElementById('reportAverage').textContent = avgGrade.toFixed(1);
+            document.getElementById('reportActive').textContent = activeStudents;
+            document.getElementById('reportBestStudent').textContent = bestStudent.average ? bestStudent.average.toFixed(1) : '-';
+            document.getElementById('reportAttendance').textContent = attendanceRate.toFixed(0) + '%';
+        }
+
+        function generateReport() {
+            const reportType = document.getElementById('reportType').value;
+            const format = document.getElementById('reportFormat').value;
+
+            let data = '', filename = '';
+
+            if (format === 'CSV') {
+                if (reportType === 'Reporte de Estudiantes') {
+                    data = 'Código,Nombre,Ciclo,Promedio,Estado\n';
+                    students.forEach(s => {
+                        data += `${s.code},"${s.firstName} ${s.lastName}",${s.cycle},${s.average},${s.status}\n`;
+                    });
+                    filename = 'estudiantes.csv';
+                } else {
+                    data = 'REPORTE COMPLETO\n';
+                    filename = 'reporte.csv';
+                }
+
+                const blob = new Blob([data], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.click();
+                window.URL.revokeObjectURL(url);
+            } else {
+                const jsonData = {
+                    students, teachers, subjects, gradesData, attendanceData, scheduleData,
+                    generatedAt: new Date().toISOString()
+                };
+
+                const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'reporte.json';
+                a.click();
+                window.URL.revokeObjectURL(url);
+            }
+
+            showNotification('Reporte generado', 'success');
+        }
+
+        // ========== CONFIGURACIÓN ==========
+        function loadConfiguration() {
+            const totalRecords = students.length + teachers.length + subjects.length + attendanceData.length + scheduleData.length;
+            document.getElementById('totalRecords').textContent = totalRecords;
+
+            const facultyName = localStorage.getItem('facultyName');
+            const academicYear = localStorage.getItem('academicYear');
+            const minGrade = localStorage.getItem('minGrade');
+
+            if (facultyName) document.getElementById('facultyName').value = facultyName;
+            if (academicYear) document.getElementById('academicYear').value = academicYear;
+            if (minGrade) document.getElementById('minGrade').value = minGrade;
+        }
+
+        function saveConfiguration() {
+            localStorage.setItem('facultyName', document.getElementById('facultyName').value);
+            localStorage.setItem('academicYear', document.getElementById('academicYear').value);
+            localStorage.setItem('minGrade', document.getElementById('minGrade').value);
+            showNotification('Configuración guardada', 'success');
+        }
+
+        function backupData() {
+            const data = {
+                students, teachers, subjects, gradesData, attendanceData, scheduleData,
+                backupDate: new Date().toISOString()
+            };
+            
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `respaldo_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            showNotification('Respaldo creado', 'success');
+        }
+
+        function restoreData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = (event) => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        
+                        if (confirm('¿Restaurar respaldo?')) {
+                            students = data.students || [];
+                            teachers = data.teachers || [];
+                            subjects = data.subjects || [];
+                            gradesData = data.gradesData || {};
+                            attendanceData = data.attendanceData || [];
+                            scheduleData = data.scheduleData || [];
+                            
+                            saveToLocalStorage();
+                            showNotification('Datos restaurados', 'success');
+                            setTimeout(() => location.reload(), 1000);
+                        }
+                    } catch (error) {
+                        showNotification('Error al restaurar', 'error');
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
+
+        function clearAllData() {
+            if (confirm('⚠️ ¿Eliminar TODOS los datos?')) {
+                if (confirm('ÚLTIMA CONFIRMACIÓN')) {
+                    students = [];
+                    teachers = [];
+                    subjects = [];
+                    gradesData = {};
+                    attendanceData = [];
+                    scheduleData = [];
+                    
+                    saveToLocalStorage();
+                    showNotification('Datos eliminados', 'warning');
+                    setTimeout(() => location.reload(), 1000);
+                }
+            }
+        }
+
+        // ========== MODALES ==========
+        function openModal(type, mode) {
+            currentEditId = null;
+            
+            if (type === 'student') {
+                document.getElementById('studentModalTitle').textContent = mode === 'add' ? 'Agregar Estudiante' : 'Editar Estudiante';
+                if (mode === 'add') document.getElementById('studentForm').reset();
+                document.getElementById('studentModal').classList.add('active');
+            } else if (type === 'teacher') {
+                document.getElementById('teacherModalTitle').textContent = mode === 'add' ? 'Agregar Docente' : 'Editar Docente';
+                if (mode === 'add') document.getElementById('teacherForm').reset();
+                document.getElementById('teacherModal').classList.add('active');
+            } else if (type === 'subject') {
+                document.getElementById('subjectModalTitle').textContent = mode === 'add' ? 'Agregar Asignatura' : 'Editar Asignatura';
+                if (mode === 'add') document.getElementById('subjectForm').reset();
+                loadSubjects();
+                document.getElementById('subjectModal').classList.add('active');
+            } else if (type === 'grade') {
+                loadGrades();
+                document.getElementById('gradeModal').classList.add('active');
+            } else if (type === 'attendance') {
+                loadAttendances();
+                document.getElementById('attendanceModal').classList.add('active');
+            } else if (type === 'schedule') {
+                loadSchedule();
+                document.getElementById('scheduleForm').reset();
+                document.getElementById('scheduleModal').classList.add('active');
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            currentEditId = null;
+        }
+
+        // ========== MANEJADORES DE FORMULARIOS ==========
+        function handleStudentSubmit(e) {
+            e.preventDefault();
+            
+            const code = currentEditId || document.getElementById('studentCode').value;
+            const newStudent = {
+                code,
+                firstName: document.getElementById('studentFirstName').value,
+                lastName: document.getElementById('studentLastName').value,
+                dni: document.getElementById('studentDNI').value,
+                cycle: document.getElementById('studentCycle').value,
+                phone: document.getElementById('studentPhone').value,
+                email: document.getElementById('studentEmail').value,
+                status: document.getElementById('studentStatus').value,
+                average: 0
+            };
+
+            if (currentEditId) {
+                const index = students.findIndex(s => s.code === currentEditId);
+                if (index !== -1) {
+                    newStudent.average = students[index].average;
+                    students[index] = newStudent;
+                }
+            } else {
+                students.push(newStudent);
+            }
+
+            saveToLocalStorage();
+            loadStudents();
+            closeModal('studentModal');
+            showNotification(`Estudiante ${currentEditId ? 'actualizado' : 'agregado'}`, 'success');
+        }
+
+        function handleTeacherSubmit(e) {
+            e.preventDefault();
+            
+            const code = currentEditId || document.getElementById('teacherCode').value;
+            const newTeacher = {
+                code,
+                name: document.getElementById('teacherName').value,
+                dni: document.getElementById('teacherDNI').value,
+                specialty: document.getElementById('teacherSpecialty').value,
+                degree: document.getElementById('teacherDegree').value,
+                phone: document.getElementById('teacherPhone').value,
+                email: document.getElementById('teacherEmail').value,
+                status: document.getElementById('teacherStatus').value
+            };
+
+            if (currentEditId) {
+                const index = teachers.findIndex(t => t.code === currentEditId);
+                if (index !== -1) teachers[index] = newTeacher;
+            } else {
+                teachers.push(newTeacher);
+            }
+
+            saveToLocalStorage();
+            loadTeachers();
+            closeModal('teacherModal');
+            showNotification(`Docente ${currentEditId ? 'actualizado' : 'agregado'}`, 'success');
+        }
+
+        function handleSubjectSubmit(e) {
+            e.preventDefault();
+            
+            const code = currentEditId || document.getElementById('subjectCode').value;
+            const newSubject = {
+                code,
+                name: document.getElementById('subjectName').value,
+                cycle: document.getElementById('subjectCycle').value,
+                credits: parseInt(document.getElementById('subjectCredits').value),
+                teacher: document.getElementById('subjectTeacher').value
+            };
+
+            if (currentEditId) {
+                const index = subjects.findIndex(s => s.code === currentEditId);
+                if (index !== -1) subjects[index] = newSubject;
+            } else {
+                subjects.push(newSubject);
+            }
+
+            saveToLocalStorage();
+            loadSubjects();
+            closeModal('subjectModal');
+            showNotification(`Asignatura ${currentEditId ? 'actualizada' : 'agregada'}`, 'success');
+        }
+
+        function handleGradeSubmit(e) {
+            e.preventDefault();
+            
+            const studentCode = document.getElementById('gradeStudent').value;
+            const subject = document.getElementById('gradeSubject').value;
+            const type = document.getElementById('gradeType').value;
+            const weight = parseFloat(document.getElementById('gradeWeight').value);
+            const grade = parseFloat(document.getElementById('gradeValue').value);
+
+            if (!gradesData[studentCode]) gradesData[studentCode] = {};
+            if (!gradesData[studentCode][subject]) gradesData[studentCode][subject] = [];
+
+            gradesData[studentCode][subject].push({ type, weight, grade });
+
+            updateStudentAverage(studentCode);
+            saveToLocalStorage();
+            loadGrades();
+            loadStudents();
+            closeModal('gradeModal');
+            document.getElementById('gradeForm').reset();
+            showNotification('Calificación registrada', 'success');
+        }
+
+        function handleAttendanceSubmit(e) {
+            e.preventDefault();
+            
+            const newAttendance = {
+                date: document.getElementById('attendanceFormDate').value,
+                subject: document.getElementById('attendanceFormSubject').value,
+                studentCode: document.getElementById('attendanceFormStudent').value,
+                status: document.getElementById('attendanceStatus').value
+            };
+
+            attendanceData.push(newAttendance);
+            saveToLocalStorage();
+            loadAttendances();
+            closeModal('attendanceModal');
+            document.getElementById('attendanceForm').reset();
+            showNotification('Asistencia registrada', 'success');
+        }
+
+        function handleScheduleSubmit(e) {
+            e.preventDefault();
+            
+            const newSchedule = {
+                subject: document.getElementById('scheduleSubject').value,
+                day: document.getElementById('scheduleDay').value,
+                time: document.getElementById('scheduleTime').value,
+                classroom: document.getElementById('scheduleClassroom').value
+            };
+
+            scheduleData.push(newSchedule);
+            saveToLocalStorage();
+            loadSchedule();
+            closeModal('scheduleModal');
+            document.getElementById('scheduleForm').reset();
+            showNotification('Horario agregado', 'success');
+        }
+
+        // ========== INICIALIZACIÓN ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.setAttribute('data-theme', savedTheme);
+            document.getElementById('themeToggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+            loadFromLocalStorage();
+            loadDashboardData();
+
+            document.querySelectorAll('.menu-link').forEach(link => {
+                link.addEventListener('click', function() {
+                    const viewName = this.getAttribute('data-view');
+                    if (viewName) navigateToView(viewName);
+                });
+            });
+
+            window.addEventListener('click', function(event) {
+                if (event.target.classList.contains('modal')) {
+                    event.target.classList.remove('active');
+                }
+            });
+
+            // ✅ NUEVO: Búsqueda en tiempo real
+            const searchStudent = document.getElementById('searchStudent');
+            if (searchStudent) {
+                searchStudent.addEventListener('input', applyStudentFilters);
+            }
+
+            const filterCycle = document.getElementById('filterCycle');
+            if (filterCycle) {
+                filterCycle.addEventListener('change', applyStudentFilters);
+            }
+
+            const filterStatus = document.getElementById('filterStatus');
+            if (filterStatus) {
+                filterStatus.addEventListener('change', applyStudentFilters);
+            }
+        });
+    </script>
+</body>
+</html>
